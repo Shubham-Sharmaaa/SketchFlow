@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Shapes } from "../_components/Canvas";
-
+const ws_url = process.env.NEXT_PUBLIC_WS_BACKEND;
 const useWebSocket = (
   token: string,
   roomId: string,
@@ -8,7 +8,7 @@ const useWebSocket = (
 ) => {
   const [client, setClient] = useState<WebSocket | null>(null);
   useEffect(() => {
-    const client = new WebSocket("ws://localhost:8080?token=" + token);
+    const client = new WebSocket(`${ws_url}?token=` + token);
     client.onopen = async () => {
       client.send(JSON.stringify({ type: "join-room", roomId: roomId }));
     };
