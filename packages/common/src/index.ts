@@ -9,5 +9,7 @@ const Signin = z.object({
   email: email(),
   password: z.string(),
 });
-
-export { Signup, Signin };
+const CreateRoom = z.object({
+  slug: z.string().max(20),
+});
+export { Signup, Signin, CreateRoom };
