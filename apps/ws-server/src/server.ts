@@ -21,6 +21,26 @@ function checkuser(token: string): string | null {
     return null;
   }
 }
+function broadcastActiveUser(roomId: string) {
+  let cnt = 0;
+
+  users.forEach((user) => {
+    if (user.rooms.includes(roomId)) {
+      cnt++;
+    }
+  });
+  console.log("broadcasting active users:", cnt);
+  users.forEach((user) => {
+    if (user.rooms.includes(roomId)) {
+      user.ws.send(
+        JSON.stringify({
+          type: "active_users",
+          count: cnt,
+        }),
+      );
+    }
+  });
+}
 wss.on("connection", (ws, request) => {
   console.log("new connection", request.url);
 
@@ -38,16 +58,18 @@ wss.on("connection", (ws, request) => {
       console.log("message received: ", parsedData);
       const { type, shape, roomId } = parsedData;
       if (!roomId) return;
-
       if (type === "join-room") {
         const user = users.find((u) => u.ws === ws);
         if (!user || user?.rooms.includes(roomId)) return;
         user.rooms.push(roomId);
+        console.log("joining room", users);
+        broadcastActiveUser(roomId);
       }
       if (type === "leave-room") {
         const user = users.find((u) => u.ws === ws);
         if (!user?.rooms.includes(roomId)) return;
         user.rooms = user.rooms.filter((r) => r !== roomId);
+        broadcastActiveUser(roomId);
       }
       if (type === "chat" && shape) {
         const user = users.find((u) => u.ws === ws);
@@ -66,7 +88,7 @@ wss.on("connection", (ws, request) => {
             user.ws.send(
               JSON.stringify({
                 type: "chat",
-                shape: JSON.stringify(shape),
+                shape,
                 roomId,
               }),
             );
@@ -78,7 +100,12 @@ wss.on("connection", (ws, request) => {
     }
   });
   ws.on("close", () => {
-    users = users.filter((user) => user.ws !== ws);
+    const user = users.find((user) => user.ws === ws);
+    if (user) {
+      const rooms = [...user.rooms];
+      users = users.filter((user) => user.ws !== ws);
+      rooms.forEach((roomId) => broadcastActiveUser(roomId));
+    }
     console.log("connection closed");
   });
 });

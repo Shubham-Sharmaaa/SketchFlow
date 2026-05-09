@@ -1,10 +1,13 @@
 "use client";
 import { useRef, useEffect, useState } from "react";
-import { Circle, PenLine, RectangleHorizontal } from "lucide-react";
+
 import Renderer from "./Renderer";
 import useWindowSize from "../_hooks/useWindowSize";
 import useWebSocket from "../_hooks/useWebSocket";
 import { useCanvasHandlers } from "../_hooks/useCanvasHandler";
+import Header from "./Header";
+import ItemBar from "./ItemBar";
+
 export interface Shapes {
   type: "rectangle" | "circle" | "line";
   x?: number;
@@ -21,16 +24,24 @@ const token =
 export type CurrentShape = {
   type: "rectangle" | "circle" | "line";
 };
-const Canvas = ({ roomId, shapes }: { roomId: string; shapes: Shapes[] }) => {
+const Canvas = ({
+  roomId,
+  shapes,
+  slug,
+}: {
+  roomId: string;
+  shapes: Shapes[];
+  slug: string;
+}) => {
   const [currShapes, setCurrentShapes] = useState(shapes);
   const [activeShape, setActiveShape] = useState<CurrentShape | null>(null);
-
-  const client = useWebSocket(token, roomId, setCurrentShapes);
-  const size = useWindowSize();
+  const [count, setCount] = useState(0);
+  const client = useWebSocket(token, roomId, setCurrentShapes, setCount);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const size = useWindowSize(containerRef);
 
   const ctxref = useRef<HTMLCanvasElement>(null);
   const shapeRef = useRef(currShapes);
-
   useCanvasHandlers(
     ctxref,
     shapeRef,
@@ -51,52 +62,18 @@ const Canvas = ({ roomId, shapes }: { roomId: string; shapes: Shapes[] }) => {
   }, [currShapes]);
 
   return (
-    <>
-      <div className="absolute flex gap-4 items-center py-2 px-8 top-12.5 left-40 bg-gray-700 min-w-[70%] text-white  rounded">
-        <button
-          onClick={() =>
-            setActiveShape({
-              type: "rectangle",
-            })
-          }
-          className={
-            activeShape?.type === "rectangle" ? "bg-red-200 " : "bg-transparent"
-          }
-        >
-          <RectangleHorizontal />
-        </button>
-        <button
-          onClick={() =>
-            setActiveShape({
-              type: "line",
-            })
-          }
-          className={
-            activeShape?.type === "line" ? "bg-red-200 " : "bg-transparent"
-          }
-        >
-          <PenLine />
-        </button>
-        <button
-          onClick={() =>
-            setActiveShape({
-              type: "circle",
-            })
-          }
-          className={
-            activeShape?.type === "circle" ? "bg-red-200 " : "bg-transparent"
-          }
-        >
-          <Circle />
-        </button>
+    <div className="h-screen flex flex-col bg-gray-300">
+      <Header slug={slug} count={count} client={client} roomId={roomId} />
+      <div ref={containerRef} className=" relative flex-1 overflow-hidden">
+        <canvas
+          ref={ctxref}
+          width={size.width}
+          height={size.height}
+          className="bg-gray-400 w-full h-full"
+        />
+        <ItemBar setActiveShape={setActiveShape} activeShape={activeShape} />
       </div>
-      <canvas
-        ref={ctxref}
-        width={size.width}
-        height={size.height}
-        className="bg-gray-400 "
-      ></canvas>
-    </>
+    </div>
   );
 };
 

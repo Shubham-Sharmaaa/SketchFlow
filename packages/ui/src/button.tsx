@@ -1,18 +1,27 @@
 "use client";
 
-import { ReactNode } from "react";
+import { ButtonHTMLAttributes, ReactNode } from "react";
 
-interface ButtonProps {
+interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode;
   className?: string;
-  appName: string;
+  variant: "primary" | "secondary";
 }
-
-export const Button = ({ children, className, appName }: ButtonProps) => {
+let styles = {
+  primary: "bg-blue-500 text-white ",
+  secondary: "",
+  default: "p-2 rounded",
+};
+export const Button = ({
+  children,
+  className,
+  variant,
+  ...props
+}: ButtonProps) => {
   return (
     <button
-      className={className}
-      onClick={() => alert(`Hello from your ${appName} app!`)}
+      className={`${styles[variant]} ${className} ${styles["default"]}`}
+      {...props}
     >
       {children}
     </button>

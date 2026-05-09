@@ -39,7 +39,7 @@ const Page = async ({
   }
   return (
     <div className="w-screen h-screen relative">
-      <Canvas roomId={roomId} shapes={shapes} />
+      <Canvas roomId={roomId} shapes={shapes} slug={slug} />
     </div>
   );
 };
