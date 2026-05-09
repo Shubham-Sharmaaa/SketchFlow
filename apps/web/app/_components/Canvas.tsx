@@ -1,6 +1,6 @@
 "use client";
 import { useRef, useEffect, useState } from "react";
-import { PenLine, RectangleHorizontal } from "lucide-react";
+import { Circle, PenLine, RectangleHorizontal } from "lucide-react";
 import Renderer from "./Renderer";
 import useWindowSize from "../_hooks/useWindowSize";
 import useWebSocket from "../_hooks/useWebSocket";
@@ -13,6 +13,7 @@ export interface Shapes {
   height?: number;
   x2?: number;
   y2?: number;
+  radius?: number;
 }
 const token =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIyYTdkODVlMy02ZmExLTQyOTktOWI2NS1iMzkwNDQyOGRmNDciLCJpYXQiOjE3NzcxNDA3NTZ9.xfJa0CV25HqnlzqzN0PSljETJiUtXVMC0c03-iEdgNQ";
@@ -75,6 +76,18 @@ const Canvas = ({ roomId, shapes }: { roomId: string; shapes: Shapes[] }) => {
           }
         >
           <PenLine />
+        </button>
+        <button
+          onClick={() =>
+            setActiveShape({
+              type: "circle",
+            })
+          }
+          className={
+            activeShape?.type === "circle" ? "bg-red-200 " : "bg-transparent"
+          }
+        >
+          <Circle />
         </button>
       </div>
       <canvas
