@@ -37,9 +37,10 @@ const Page = async ({
 
     return <div>{e.response?.data?.message || "Something went wrong"}</div>;
   }
+  if (!token) return;
   return (
     <div className="w-screen h-screen relative">
-      <Canvas roomId={roomId} shapes={shapes} slug={slug} />
+      <Canvas roomId={roomId} shapes={shapes} slug={slug} token={token} />
     </div>
   );
 };

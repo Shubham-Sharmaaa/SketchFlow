@@ -107,10 +107,7 @@ app.get(
       const messages = await prisma.chat.findMany({
         where: {
           roomId: roomexist.id,
-        },
-        take: 50,
-        orderBy: {
-          id: "desc",
+          isDeleted: false,
         },
       });
 

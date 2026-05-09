@@ -57,6 +57,48 @@ wss.on("connection", (ws, request) => {
       const parsedData = JSON.parse(data.toString());
       console.log("message received: ", parsedData);
       const { type, shape, roomId } = parsedData;
+      if (type === "redo") {
+        const lastShape = await prisma.chat.findFirst({
+          where: {
+            roomId,
+            isDeleted: true,
+          },
+          orderBy: {
+            id: "desc",
+          },
+        });
+        if (lastShape) {
+          await prisma.chat.update({
+            where: {
+              id: lastShape.id,
+            },
+            data: {
+              isDeleted: false,
+            },
+          });
+        }
+      }
+      if (type === "undo") {
+        const lastShape = await prisma.chat.findFirst({
+          where: {
+            roomId,
+            isDeleted: false,
+          },
+          orderBy: {
+            id: "desc",
+          },
+        });
+        if (lastShape) {
+          await prisma.chat.update({
+            where: {
+              id: lastShape.id,
+            },
+            data: {
+              isDeleted: true,
+            },
+          });
+        }
+      }
       if (!roomId) return;
       if (type === "join-room") {
         const user = users.find((u) => u.ws === ws);
@@ -80,6 +122,12 @@ wss.on("connection", (ws, request) => {
             message: JSON.stringify(shape),
             userId,
             roomId: Number(roomId),
+          },
+        });
+        await prisma.chat.deleteMany({
+          where: {
+            roomId,
+            isDeleted: true,
           },
         });
         users.forEach((user) => {

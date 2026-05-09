@@ -4,8 +4,7 @@
 // Get a free hosted Postgres database in seconds: `npx create-db`
 
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -38,4 +37,5 @@ model Chat{
   roomId Int
   user User @relation(fields: [userId] ,references: [id])
   room Room @relation(fields:[roomId], references: [id])
+  isDeleted Boolean @default(false)
 }
